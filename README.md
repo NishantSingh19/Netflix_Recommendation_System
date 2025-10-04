@@ -43,10 +43,3 @@ The project uses a Netflix dataset (`Output.csv`) containing:
 | **Matplotlib / Seaborn** | Optional static plots |
 
 ---
-
-## ⚙️ Installation & Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/netflix-dashboard.git
-   cd netflix-dashboard
