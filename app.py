@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import requests
 import streamlit as st
 
 
@@ -11,11 +12,12 @@ df = pd.DataFrame(data)
 st.set_page_config(page_title="Netflix Recommendation System", page_icon="📊")
 st.header("Overview")
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Trends",
     "🌍 Countries",
     "🎭 Genres",
     "🔖 Ratings",
+    "🎬 Recommanded Movies",
     "⌛ Duration & Seasons",
     "🕰️ Historical Content"
     ])
@@ -134,7 +136,7 @@ with tab4:
     fig6 = px.bar(merged_df, x="count", y="rating",color="rating", color_discrete_sequence=px.colors.qualitative.Bold, text="count")
     st.plotly_chart(fig6)
 
-with tab5:
+with tab6:
     st.subheader("⌛ Duration & Seasons")
     st.write("##### What is the average `duration` of movies?")
 
@@ -149,7 +151,7 @@ with tab5:
     st.write(f"- `Average watch duration of TV Shows : {seasons_watch['mean']:.2f} seasons`")
     st.write(f"- `Total number of TV Shows : {seasons_watch['count'].astype(int)}`")
 
-with tab6:
+with tab7:
     st.subheader("🕰️ Historical Content")
 
     st.write("##### Do `older movies (pre-2000)` still make up a large portion of Netflix’s library?")
@@ -172,3 +174,47 @@ with tab6:
         hole=0.33
     )
     st.plotly_chart(fig7, use_container_width=True)
+
+with tab5:
+    st.subheader("Recommanded Movies")
+
+    country = st.selectbox(options=df[df["country"] != "unknown"]['country'].unique(), label="Select Country")
+
+    movie_genre = st.selectbox(options=df['Genre'].sort_values(ascending=True).unique(), label="Select Movie Genre")
+
+    suggest = df[(df['Genre'] == movie_genre) & (df['country'] == country)].sort_values(ascending=False ,by='release_year').head(6)
+
+    def movie_poster(movie_title):
+        movie_list = []
+        for movie in movie_title:
+            url = f"https://www.omdbapi.com/?t={movie}&apikey=a8abe21d"
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                poster = data.get('Poster', None)
+                if poster and poster != 'N/A':
+                    movie_list.append((movie, poster))
+            else:
+                st.error(f"Movie '{movie}' not found!")
+        return movie_list
+
+    posters = movie_poster(suggest['title'])
+
+    if posters:
+        html = "<div style='display: flex; flex-wrap: wrap; justify-content: space-between; margin: 20px; margin-top: 50px; gap: 20px;'>"
+
+        for title, img in posters:
+            html += f"""
+                <div style="text-align: center;">
+                    <img src="{img}" width="180" height="260"
+                        style="border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.3);">
+                    <p style="margin-top: 8px; font-weight: 600; font-size: 14px; color: #E50914;">{title}</p>
+                </div>
+            """
+
+        html += "</div>"
+        st.html(html)
+
+    else:
+        st.info("No posters found for this selection.")
+
