@@ -182,7 +182,7 @@ with tab5:
 
     movie_genre = st.selectbox(options=df['Genre'].sort_values(ascending=True).unique(), label="Select Movie Genre")
 
-    suggest = df[(df['Genre'] == movie_genre) & (df['country'] == country)].sort_values(ascending=False ,by='release_year').head(6)
+    suggest = df[(df['Genre'] == movie_genre) & (df['country'] == country)].sort_values(ascending=False ,by='release_year').head(12)
 
     def movie_poster(movie_title):
         movie_list = []
@@ -217,4 +217,5 @@ with tab5:
 
     else:
         st.info("No posters found for this selection.")
+
 
